@@ -1,4 +1,4 @@
-ï»¿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <GL/freeglut.h>
 #include <string>
@@ -51,7 +51,7 @@ void Initialize() {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
 
-	//determina a posiÃ§Ã£o da luz
+	//determina a posição da luz
 	GLfloat posicao_luz[] = { .5, .5, 0.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, posicao_luz);
 }
@@ -61,7 +61,7 @@ int main(int iArgc, char** cppArgv) {
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(250, 250);
 	glutInitWindowPosition(200, 200);
-	glutCreateWindow("IluminaÃ§Ã£o");
+	glutCreateWindow("Iluminação");
 	Initialize();
 	glutDisplayFunc(Draw);
 	glutMainLoop();
