@@ -1,2 +1,2 @@
-# graphic-computing
+# Graphic Computing
  
