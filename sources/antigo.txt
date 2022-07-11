@@ -1,0 +1,230 @@
+#include <iostream>
+#include <GL/freeglut.h>
+#include <vector>
+
+struct vertice {
+	double x, y, z;
+};
+
+vertice criar_vertice(double x, double y, double z) {
+	vertice v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+
+	return v;
+}
+
+using lista_vertices = std::vector<vertice>;
+using aresta = std::pair<int, int>;
+using lista_arestas = std::vector<aresta>;
+
+struct Poligono {
+	double tamanhoLado;
+	int numLados;
+	vertice posicao;
+	vertice escala;
+	double rotacao;
+	lista_vertices vertices;
+	lista_arestas arestas;
+};
+
+Poligono criar_poligono(double posicao_x, double posicao_y, double tamanho_lado, int num_lados);
+void desenhar(Poligono poligono);
+void movimentar(Poligono& poligono, double distancia, double angulo);
+void escalar(Poligono& poligono, double escala_x, double escala_y);
+void rotacionar(Poligono& poligono, double angulo);
+
+void display();
+void idle();
+void redraw(int value);
+void keyboard(unsigned char key, int x, int y);
+void keyboard_special(int key, int x, int y);
+
+Poligono pentagono;
+int delay = 10;
+double taxaMovimentacao = 0.05;
+double taxaEscala = 0.05;
+double taxaRotacao = 0.05;
+double taxaRotacao_x = taxaRotacao;
+double taxaRotacao_y = taxaRotacao;
+double taxaRotacao_z = taxaRotacao;
+
+
+void display(void) {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	desenhar(pentagono);
+
+	glFlush();
+}
+
+// Função de teclas comuns do keyboard
+void keyboard(unsigned char key, int x, int y) {
+	std::cout << "Key:" << key << std::endl;
+	switch (key) {
+	case 27:
+		exit(0);
+		break;
+	case 55:
+		rotacionar(pentagono, taxaRotacao, 0, 0); // Rotacionar para baixo
+		break;
+	case 57:
+		rotacionar(pentagono, -taxaRotacao, 0, 0); // Rotacionar para cima
+		break;
+	case 52:
+		rotacionar(pentagono, 0, -taxaRotacao, 0); // Rotacionar para esquerda
+		break;
+	case 54:
+		rotacionar(pentagono, 0, taxaRotacao, 0); // Rotacionar para direita
+		break;
+	case 49:
+		rotacionar(pentagono, 0, 0, taxaRotacao); // Rotacionar eixo z
+		break;
+	case 51:
+		rotacionar(pentagono, 0, 0, -taxaRotacao); // Rotacionar eixo z
+		break;
+	}
+}
+
+// Função de teclas especiais do keyboard
+void keyboard_special(int key, int x, int y) {
+	std::cout << "Special Key:" << key << std::endl;
+	switch (key) {
+	case GLUT_KEY_DOWN:
+		movimentar(pentagono, taxaMovimentacao, (270 / 180.0) * 3.1416);
+		break;
+
+	case GLUT_KEY_UP:
+		movimentar(pentagono, taxaMovimentacao, (90 / 180.0) * 3.1416);
+		break;
+
+	case GLUT_KEY_RIGHT:
+		movimentar(pentagono, taxaMovimentacao, (0 / 180.0) * 3.1416);
+		break;
+
+	case GLUT_KEY_LEFT:
+		movimentar(pentagono, taxaMovimentacao, (180 / 180.0) * 3.1416);
+		break;
+
+	case GLUT_KEY_PAGE_UP:
+		escalar(pentagono, 1 + taxaEscala, 1 + taxaEscala, 1 + taxaEscala);
+		break;
+
+	case GLUT_KEY_PAGE_DOWN:
+		escalar(pentagono, 1 - taxaEscala, 1 - taxaEscala, 1 - taxaEscala);
+		break;
+	}
+}
+
+void redraw(int value) {
+	glutPostRedisplay();
+	rotacionar(pentagono, 0.05);
+	glutTimerFunc(delay, redraw, 0);
+}
+
+
+Poligono criar_poligono(double posicao_x, double posicao_y, double posicao_z) {
+	Poligono novo_poligono;
+	novo_poligono.posicao = criar_vertice(posicao_x, posicao_y, posicao_z);
+	novo_poligono.escala = criar_vertice(1, 1, 1);
+
+	novo_poligono.rotacao = 0;
+
+	// Face 01
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, 1.0f));
+
+	// Face 02
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, -1.0f));
+
+	// Face 03
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, 1.0f));
+
+	// Face 04
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, -1.0f));
+
+	// Face 05
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, 1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(-1.0f, -1.0f, 1.0f));
+
+	// Face 06
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, -1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, 1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, 1.0f));
+	novo_poligono.vertices.push_back(criar_vertice(1.0f, -1.0f, -1.0f));
+	
+	return novo_poligono;
+}
+
+void movimentar(Poligono& poligono, double distancia, double angulo) {
+	
+}
+
+void escalar(Poligono& poligono, double escala_x, double escala_y, double escala_z) {
+	
+}
+
+void rotacionar(Poligono& poligono, double angulo_x, double angulo_y, double angulo_z) {
+	
+}
+
+void desenhar(Poligono poligono) {
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_QUADS);
+
+	for (int i = 0; i < poligono.vertices.size(); i++) {
+		// Escolhendo cor para cada face
+		if (i % 4 == 0)
+			glColor3f(0.0f, 1.0f, 0.0f); // Verde
+		if (i % 8 == 0)
+			glColor3f(1.0f, 0.5f, 0.0f); // Laranja
+		if (i % 12 == 0)
+			glColor3f(1.0f, 0.0f, 0.0f); // Vermelho
+		if (i % 16 == 0)
+			glColor3f(1.0f, 1.0f, 0.0f); // Amarelo
+		if (i % 20 == 0)
+			glColor3f(0.0f, 0.0f, 1.0f); // Azul
+		if (i % 24 == 0)
+			glColor3f(1.0f, 0.0f, 1.0f); // Magenta
+
+		glVertex3f(poligono.vertices[i].x, poligono.vertices[i].y, poligono.vertices[i].z);
+	}
+	glEnd();
+}
+
+
+int main(int argc, char** argv) {
+
+	pentagono = criar_poligono(128, 128, 128);
+
+	glutInit(&argc, argv);
+
+	glutInitWindowSize(512, 512);
+
+	glutCreateWindow("Desenhando uma linha");
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glOrtho(-5, 5, -5, 5, -1, 1);
+
+	glutDisplayFunc(display);
+	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(keyboard_special);
+	glutTimerFunc(10, redraw, 0);
+
+	glutMainLoop();
+
+	return 0;
+}
